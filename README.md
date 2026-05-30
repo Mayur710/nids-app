@@ -12,7 +12,7 @@
 
 **An end-to-end AI-powered security system that detects network attacks, explains them in plain English, and answers your security questions.**
 
-[Live Demo](https://nids-app-agbfipydqeekvifyddz6yu.streamlit.app) • [Dataset](https://www.unb.ca/cic/datasets/ids-2017.html)
+[Live Demo](https://nids-app-na2cyjynjcgsdmbsvyki2t.streamlit.app/) • [Dataset](https://www.unb.ca/cic/datasets/ids-2017.html)
 
 </div>
 
