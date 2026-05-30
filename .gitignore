@@ -1,0 +1,8 @@
+myvenv/
+MachineLearningCVE/
+__pycache__/
+*.pyc
+.env
+.vscode/
+models/
+preprocessed_data/

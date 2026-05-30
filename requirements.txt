@@ -1,0 +1,14 @@
+streamlit
+pandas
+numpy
+scikit-learn
+xgboost
+imbalanced-learn
+joblib
+langchain
+langchain-groq
+langchain-chroma
+langchain-huggingface
+chromadb
+python-dotenv
+sentence-transformers
