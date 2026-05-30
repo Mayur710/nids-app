@@ -8,10 +8,9 @@ import os
 
 def download_models():
     if not os.path.exists('models'):
-        os.makedirs('models')
+        os.makedirs('models', exist_ok=True)
     if not os.path.exists('preprocessed_data'):
-        os.makedirs('preprocessed_data')
-    
+        os.makedirs('preprocessed_data', exist_ok=True)
     # Only download if files don't exist
     files = {
         'models/rf.pkl': '19fC9xLkp239JKbds1qXrB0mtAgNn6ebN',
@@ -51,60 +50,70 @@ st.write("Upload a network traffic CSV file to detect attacks")
 #section 1 where we have to upload csv and run ML models    
 st.header("Upload network traffic data")
 uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
-if(uploaded_file is not None):
-    
+if uploaded_file is not None:
     data = pd.read_csv(uploaded_file)
+    
+    if len(data) > 10000:
+        data = data.sample(n=10000, random_state=42)
+        st.info("Large file detected. Processing a sample of 10,000 rows.")
+    
     data.columns = data.columns.str.strip()
     st.write("Data preview:")
     st.dataframe(data.head())
-    #preprocess the data using the scaler and pca we loaded
+    
     if "Label" in data.columns:
         features = data.drop(columns=["Label"])
     else:
         features = data.copy()
+    
     features = features[feature_columns]
     features = features.replace([np.inf, -np.inf], np.nan)
     features = features.dropna()
-    scaled_features = scaler.transform(features)
-    pca_features = pca.transform(scaled_features)
-    #predict using the ml model we loaded
-    predictions = ml_model.predict(pca_features)
     
-    predicted_labels = label_encoder.inverse_transform(predictions)
-    features["predicted_label"] = predicted_labels
-    st.write(features["predicted_label"].value_counts())
-    st.write("Predictions:")
-    st.dataframe(features[["predicted_label"]].head())
+    try:
+        scaled_features = scaler.transform(features)
+        pca_features = pca.transform(scaled_features)
+        predictions = ml_model.predict(pca_features)
+        predicted_labels = label_encoder.inverse_transform(predictions)
+        features["predicted_label"] = predicted_labels
+        
+        st.write(features["predicted_label"].value_counts())
+        st.write("Predictions:")
+        st.dataframe(features[["predicted_label"]].head())
 
-    st.header("Detection Results")
-    #attack distribution bar chart
-    st.subheader("Attack Distribution")
-    attack_counts = features["predicted_label"].value_counts()
-    st.bar_chart(attack_counts)
+        st.header("Detection Results")
+        st.subheader("Attack Distribution")
+        attack_counts = features["predicted_label"].value_counts()
+        st.bar_chart(attack_counts)
 
-    total_flows = len(features)
-    malicious = len(features[features["predicted_label"] != "BENIGN"])
-    benign = len(features[features["predicted_label"] == "BENIGN"])
+        total_flows = len(features)
+        malicious = len(features[features["predicted_label"] != "BENIGN"])
+        benign = len(features[features["predicted_label"] == "BENIGN"])
 
-    st.metric("Total Flows", total_flows)
-    st.metric("Malicious Flows", malicious)
-    st.metric("Benign Flows", benign)
-    st.header("AI analysis of detected attacks")
-    attack_types = features["predicted_label"].unique()
-    attack_types = [a for a in attack_types if a != "BENIGN"]
-    if len(attack_types) == 0:
-        st.write("No attacks detected in this traffic sample.")
-
-    else:
-        for attack in attack_types:
-            with st.expander(f"AI Explanation: {attack}"):
-                with st.spinner("Generating explanation..."):
-                    explanation = generate_explanation(
-                        attack_type=attack,
-                        confidence=round(attack_counts[attack] / total_flows * 100, 2),
-                        top_features="packet rate, flow duration , flag counts"  # Placeholder for actual top features
-                    )
-                    st.write(explanation)   
+        st.metric("Total Flows", total_flows)
+        st.metric("Malicious Flows", malicious)
+        st.metric("Benign Flows", benign)
+        
+        st.header("AI analysis of detected attacks")
+        attack_types = features["predicted_label"].unique()
+        attack_types = [a for a in attack_types if a != "BENIGN"]
+        
+        if len(attack_types) == 0:
+            st.write("No attacks detected in this traffic sample.")
+        else:
+            for attack in attack_types:
+                with st.expander(f"AI Explanation: {attack}"):
+                    with st.spinner("Generating explanation..."):
+                        explanation = generate_explanation(
+                            attack_type=attack,
+                            confidence=round(attack_counts[attack] / total_flows * 100, 2),
+                            top_features="packet rate, flow duration, flag counts"
+                        )
+                        st.write(explanation)
+    
+    except Exception as e:
+        st.error(f"Error during prediction: {str(e)}")
+        st.stop()
 
 st.header("Ask the Security Chatbot")
 st.write("Ask any question to security chatbot")
