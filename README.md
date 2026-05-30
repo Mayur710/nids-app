@@ -1,4 +1,4 @@
-# 🛡️ Intelligent Network Intrusion Detection System
+#  Intelligent Network Intrusion Detection System
 
 <div align="center">
 
@@ -195,7 +195,7 @@ nids-app/
 - Deployed on Streamlit Cloud with secrets management
 
 
-## 👤 Author
+##  Author
 
 **Mayur** — [GitHub](https://github.com/Mayur710)
 
