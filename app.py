@@ -3,6 +3,36 @@ import joblib
 import pandas as pd 
 import numpy as np
 from genai import generate_explanation, ask_security_chatbot
+import gdown
+import os
+
+def download_models():
+    if not os.path.exists('models'):
+        os.makedirs('models')
+    if not os.path.exists('preprocessed_data'):
+        os.makedirs('preprocessed_data')
+    
+    # Only download if files don't exist
+    files = {
+        'models/rf.pkl': '19fC9xLkp239JKbds1qXrB0mtAgNn6ebN',
+        'models/dt.pkl': '1ukDtHq89wykJGetld-_Cjzd6T1elbCBA',
+        'models/xgb.pkl': '1I4s1VB2vXdoZqISBr7_K7Zrc6VjD4pri',
+        'models/voting.pkl': '1Sl-EqB_oRdI5vZqmey8PCWhHdTwaAVxv',
+        'preprocessed_data/scaler.pkl': '1W1cpn_1OJ8hPR8pPr9FqnKvbSakPWB3u',
+        'preprocessed_data/pca.pkl': '1mSMAw41uUeee7nBqXSK3pk2Py93Hra-C',
+        'preprocessed_data/label_encoder.pkl': '1adfN8Om7MNZi-TbVwaaor_Az7rneML7J',
+        'preprocessed_data/feature_columns.pkl': '1Is09beVasUAhS7IgQFCQEEcFqqC9hT8-',
+    }
+    
+    for path, file_id in files.items():
+        if not os.path.exists(path):
+            gdown.download(
+                f'https://drive.google.com/uc?id={file_id}',
+                path,
+                quiet=False
+            )
+
+download_models()
 @st.cache_resource
 def load_models():
     #here we have to load pkl and npy files for ML models 

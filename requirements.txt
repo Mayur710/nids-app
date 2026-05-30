@@ -12,3 +12,4 @@ langchain-huggingface
 chromadb
 python-dotenv
 sentence-transformers
+gdown
